@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="jrk.shop.order.Order" table="orders">
+		<!-- 配置主键 -->
+		<id name="oid" column="oid">
+			<generator class="native" />
+		</id>
+		<!-- 配置一般属性 -->
+		<property name="total" column="total" />
+		<property name="ordertime" column="ordertime" />
+		<property name="state" column="state" />
+		<property name="addr" column="addr" />
+		<property name="phone" column="phone" />
+		<property name="name" column="name"/>
+		<!-- 外键 多对一 -->
+		<many-to-one name="user" class="jrk.shop.user.User"
+			column="uid" lazy="false" />
+		<!-- 配置外键 一对多 -->
+		<set name="orderItems" cascade="save-update" lazy="false">
+			<key column="oid" />
+			<one-to-many class="jrk.shop.order.OrderItem" />
+		</set>
+	</class>
+
+</hibernate-mapping>

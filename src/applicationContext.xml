@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+	<!-- 引入外部jdbc.properties文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	<!-- 配置连接池的信息 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<!-- 数据库连接的四个基本参数 -->
+		<property name="driverClass" value="${jdbc.driver}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.user}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	<!-- 配置hibernate的相关属性 -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<!-- 注入连接池 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 配置hibernate的其他属性 -->
+		<property name="hibernateProperties">
+			<props>
+				<!-- Hibernate的方言 -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.connection.autocommit">false</prop>
+			</props>
+		</property>
+		<property name="mappingResources">
+			<list>
+				<value>jrk/shop/user/User.hbm.xml</value>
+				<value>jrk/shop/category/Category.hbm.xml</value>
+				<value>jrk/shop/product/Product.hbm.xml</value>
+				<value>jrk/shop/categorysecond/CategorySecond.hbm.xml</value>
+				<value>jrk/shop/order/Order.hbm.xml</value>
+				<value>jrk/shop/order/OrderItem.hbm.xml</value>
+				<value>jrk/shop/adminuser/AdminUser.hbm.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- 声明式事务管理 -->
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- 配置Action================================================ -->
+	<bean id="indexAction" class="jrk.shop.index.IndexAction" scope="prototype">
+		<property name="categoryService" ref="categoryService"></property>
+		<property name="productService" ref="productService" />
+	</bean>
+	<bean id="userAction" class="jrk.shop.user.UserAction" scope="prototype">
+		<property name="userService" ref="userService"></property>
+	</bean>
+	<bean id="checkImg" class="jrk.shop.user.CheckImgAction" scope="prototype"></bean>
+	<bean id="categoryAction" class="jrk.shop.category.CategoryAction"
+		scope="prototype">
+		<property name="categoryService" ref="categoryService"></property>
+	</bean>
+	<bean id="productAction" class="jrk.shop.product.ProductAction"
+		scope="prototype">
+		<property name="productService" ref="productService" />
+		<property name="categoryService" ref="categoryService" />
+		<property name="categorySecondService" ref="categorySecondService" />
+	</bean>
+	<bean id="cartAction" class="jrk.shop.cart.CartAction" scope="prototype">
+		<property name="productService" ref="productService" />
+	</bean>
+	<bean id="orderAction" class="jrk.shop.order.OrderAction" scope="prototype">
+		<property name="orderService" ref="orderService" />
+	</bean>
+	<bean id="adminUserAction" class="jrk.shop.adminuser.AdminUserAction"
+		scope="prototype">
+		<property name="adminUserService" ref="adminUserService" />
+	</bean>
+	<bean id="categorySecondAction" class="jrk.shop.categorysecond.CategorySecondAction"
+		scope="prototype">
+		<property name="categorySecondService" ref="categorySecondService" />
+		<property name="categoryService" ref="categoryService" />
+	</bean>
+
+	<!-- 配置Service================================================ -->
+	<bean id="userService" class="jrk.shop.user.UserService">
+		<property name="userDao" ref="userDao" />
+	</bean>
+	<bean id="categoryService" class="jrk.shop.category.CategoryService">
+		<property name="categoryDao" ref="categroyDao"></property>
+	</bean>
+	<bean id="productService" class="jrk.shop.product.ProductService">
+		<property name="productDao" ref="productDao" />
+	</bean>
+	<bean id="orderService" class="jrk.shop.order.OrderService">
+		<property name="orderDao" ref="orderDao" />
+	</bean>
+	<bean id="adminUserService" class="jrk.shop.adminuser.AdminUserService">
+		<property name="adminUserDao" ref="adminUserDao" />
+	</bean>
+	<bean id="categorySecondService" class="jrk.shop.categorysecond.CategorySecondService">
+		<property name="categorySecondDao" ref="categorySecondDao" />
+	</bean>
+
+	<!-- 配置Dao================================================ -->
+	<bean id="userDao" class="jrk.shop.user.UserDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<bean id="categroyDao" class="jrk.shop.category.CategoryDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<bean id="productDao" class="jrk.shop.product.ProductDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<bean id="orderDao" class="jrk.shop.order.OrderDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<bean id="adminUserDao" class="jrk.shop.adminuser.AdminUserDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<bean id="categorySecondDao" class="jrk.shop.categorysecond.CategorySecondDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- 配置Interceptor================================================ -->
+	<bean id="loginInterceptor" class="jrk.shop.interceptor.LoginInterceptor">
+	</bean>
+
+</beans>
